@@ -59,13 +59,19 @@ void UploadServlet::handlePOST(int clientSocket) {
 void UploadServlet::handleGET(int clientSocket) {
     // Prepare and send the HTML form for file upload
     std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-    response += "<html><head><title>File Upload Form</title></head><body>";
+    response += "<html>";
+    response += "<head><title>File Upload Form</title></head><body>";
     response += "<h1>File Upload Form</h1>";
     response += "<form action='/upload' method='post' enctype='multipart/form-data'>";
     response += "<label for='file'>Select a file:</label>";
     response += "<input type='file' name='file' id='file'><br>";
+    response += "<label for='caption'>Caption:</label>";
+    response += "<input type='text' name='caption' id='caption'><br>";
+    response += "<label for='date'>Date:</label>";
+    response += "<input type='date' name='date' id='date'><br>";
     response += "<input type='submit' value='Upload'>";
-    response += "</form></body></html>";
+    response += "</form></body>";
+    response += "</html>";
 
     send(clientSocket, response.c_str(), response.length(), 0);
 }
