@@ -70,9 +70,7 @@ void UploadServlet::handleGET(int clientSocket) {
     send(clientSocket, response.c_str(), response.length(), 0);
 }
 
-int main() {
-    UploadServlet servlet;
-
+void UploadServlet::startServer() {
     int serverSocket, clientSocket;
     struct sockaddr_in serverAddr, clientAddr;
     socklen_t sinSize = sizeof(struct sockaddr_in);
@@ -86,7 +84,7 @@ int main() {
 
     // Configure server address struct
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(servlet.PORT);
+    serverAddr.sin_port = htons(PORT);
     serverAddr.sin_addr.s_addr = INADDR_ANY;
 
     // Bind the socket
@@ -103,7 +101,7 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    std::cout << "Server listening on port " << servlet.PORT << std::endl;
+    std::cout << "Server listening on port " << PORT << std::endl;
 
     // Accept incoming connections and handle requests
     while (true) {
@@ -122,14 +120,20 @@ int main() {
 
         // Determine the request method (GET or POST) and handle the request accordingly
         if (requestStr.find("GET") != std::string::npos) {
-            servlet.handleGET(clientSocket);
+            handleGET(clientSocket);
         } else if (requestStr.find("POST") != std::string::npos) {
-            servlet.handlePOST(clientSocket);
+            handlePOST(clientSocket);
         }
 
         close(clientSocket);
     }
 
     close(serverSocket);
+}
+
+
+int main() {
+    UploadServlet servlet;
+    servlet.startServer();
     return 0;
 }

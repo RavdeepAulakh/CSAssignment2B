@@ -38,6 +38,11 @@ public:
      */
     void handleGET(int clientSocket);
 
+    /*
+     * Starts the server
+     */
+    void startServer();
+
     const int PORT = 8081;
     const std::string DIRECTORY_PATH = "./images/";
 };
