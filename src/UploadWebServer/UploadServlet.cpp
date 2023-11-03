@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
-const int PORT = 8080;
+const int PORT = 8081;
 const std::string DIRECTORY_PATH = "./images/";
 
 void handlePOST(int clientSocket) {
