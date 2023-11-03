@@ -16,33 +16,26 @@
 #include <arpa/inet.h>
 
 class UploadServlet {
-public:
+private:
+    // The port number to listen for incoming connections
+    const int PORT = 8081;
 
-    /*
-     * Constructor
-     */
+    // The socket file descriptor
+    const std::string DIRECTORY_PATH = "./images/";
+
+public:
+    // Constructor
     UploadServlet();
 
-    /*
-     * Destructor
-     */
+    // Destructor
     ~UploadServlet();
 
-    /*
-     * Handles the POST request from the client
-     */
+    // Handles the request from the client
     void handlePOST(int clientSocket);
 
-    /*
-     * Handles the GET request from the client
-     */
+    // Handles the GET request from the client
     void handleGET(int clientSocket);
 
-    /*
-     * Starts the server
-     */
+    // Starts the server
     void startServer();
-
-    const int PORT = 8081;
-    const std::string DIRECTORY_PATH = "./images/";
 };
