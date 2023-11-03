@@ -1,16 +1,10 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <regex>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
+#include "UploadServlet.hpp"
 
-const int PORT = 8081;
-const std::string DIRECTORY_PATH = "./images/";
+UploadServlet::UploadServlet() : PORT(8081), DIRECTORY_PATH("./images/") {}
 
-void handlePOST(int clientSocket) {
+UploadServlet::~UploadServlet() {}
+
+void UploadServlet::handlePOST(int clientSocket) {
     std::string delimiter = "\r\n\r\n";
     char buffer[4096];
     std::string requestData = "";
@@ -62,7 +56,7 @@ void handlePOST(int clientSocket) {
     send(clientSocket, response.c_str(), response.length(), 0);
 }
 
-void handleGET(int clientSocket) {
+void UploadServlet::handleGET(int clientSocket) {
     // Prepare and send the HTML form for file upload
     std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
     response += "<html><head><title>File Upload Form</title></head><body>";
@@ -77,6 +71,8 @@ void handleGET(int clientSocket) {
 }
 
 int main() {
+    UploadServlet servlet;
+
     int serverSocket, clientSocket;
     struct sockaddr_in serverAddr, clientAddr;
     socklen_t sinSize = sizeof(struct sockaddr_in);
@@ -90,7 +86,7 @@ int main() {
 
     // Configure server address struct
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(PORT);
+    serverAddr.sin_port = htons(servlet.PORT);
     serverAddr.sin_addr.s_addr = INADDR_ANY;
 
     // Bind the socket
@@ -107,7 +103,7 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    std::cout << "Server listening on port " << PORT << std::endl;
+    std::cout << "Server listening on port " << servlet.PORT << std::endl;
 
     // Accept incoming connections and handle requests
     while (true) {
@@ -126,9 +122,9 @@ int main() {
 
         // Determine the request method (GET or POST) and handle the request accordingly
         if (requestStr.find("GET") != std::string::npos) {
-            handleGET(clientSocket);
+            servlet.handleGET(clientSocket);
         } else if (requestStr.find("POST") != std::string::npos) {
-            handlePOST(clientSocket);
+            servlet.handlePOST(clientSocket);
         }
 
         close(clientSocket);
