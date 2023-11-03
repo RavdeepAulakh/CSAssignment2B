@@ -36,7 +36,7 @@ public:
     /*
      * Handles the GET request from the client
      */
-     void handleGET(int clientSocket);
+    void handleGET(int clientSocket);
 
     const int PORT = 8081;
     const std::string DIRECTORY_PATH = "./images/";

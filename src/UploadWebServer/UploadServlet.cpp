@@ -2,12 +2,12 @@
 
 UploadServlet::UploadServlet() : PORT(8081), DIRECTORY_PATH("./images/") {}
 
-UploadServlet::~UploadServlet() {}
+UploadServlet::~UploadServlet() = default;
 
 void UploadServlet::handlePOST(int clientSocket) {
     std::string delimiter = "\r\n\r\n";
     char buffer[4096];
-    std::string requestData = "";
+    std::string requestData;
 
     // Receive POST data from the client
     int bytesRead;
