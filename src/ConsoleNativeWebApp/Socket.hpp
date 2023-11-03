@@ -1,6 +1,5 @@
-#ifndef SOCKET_H
-#define SOCKET_H
+#pragma once
 
 #include <string>
 
-class Socket {}
+class Socket {};

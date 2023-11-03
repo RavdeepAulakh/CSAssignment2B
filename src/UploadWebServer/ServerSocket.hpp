@@ -1,6 +1,5 @@
-#ifndef SOCKET_HPP
-#define SOCKET_HPP
+#pragma once
 
 #include <netinet/in.h>
 
-class Socket {}
+class Socket {};
