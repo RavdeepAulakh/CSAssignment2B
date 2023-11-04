@@ -22,7 +22,7 @@ int main() {
   
   try {
     // Attempt to establish a new ServerSocket that listens to port 8082
-    serverSocket = new ServerSocket(8082);
+    serverSocket = new ServerSocket(8083);
 
     // While the established connection exisits
       // An infinite while loop will continuously listen for new connections
