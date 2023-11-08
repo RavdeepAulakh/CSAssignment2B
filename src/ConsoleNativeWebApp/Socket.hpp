@@ -3,8 +3,10 @@
 
 #include <string>
 #include <unistd.h>
+#include <vector>
 #include <sys/socket.h>
 
+using namespace std;
 class Socket {
 
 private:
@@ -15,15 +17,10 @@ public:
 
     Socket();
 
-    inline ~Socket() {
-        close(socket_fd);
-    }
 
-    void connectToServer(const std::string& serverAddress, int port);
+    bool connectToServer(const std::string& serverAddress, int port);
 
-    inline void sendData(const std::string& data) {
-        send(socket_fd, data.c_str(), data.size(), 0);
-    };
+    bool sendData(const vector<char>& data);
 };
 
 #endif
