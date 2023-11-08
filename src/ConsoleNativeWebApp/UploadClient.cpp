@@ -67,7 +67,7 @@ public:
         size_t contentLength = nonBinaryRequestSize + binaryDataSize + closingBoundarySize;
 
         // Construct the HTTP headers
-        headerStream << "POST /upload HTTP/1.1\r\n";
+        headerStream << "POST /upload/upload HTTP/1.1\r\n";
         headerStream << "Host: " << serverAddress << ":" << port << "\r\n"; // Include the port number
         headerStream << "Content-Type: multipart/form-data; boundary=" << boundary << "\r\n";
         headerStream << "Content-Length: " << contentLength << "\r\n"; // Correct content length
@@ -102,7 +102,7 @@ public:
 
 int main() {
     const string serverAddress = "localhost";
-    const int port = 8082;
+    const int port = 8081;
     const string filePath = "C:\\Users\\bardi\\OneDrive\\Pictures\\Lebron.jpg";
 
     try {
