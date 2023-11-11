@@ -9,29 +9,30 @@
 
 using namespace std;
 
-// Function to extract the filename from a file path (assuming a Windows path)
-string extractFileName(const string& filePath) {
-    size_t pos = filePath.find_last_of("\\/");
-    return (pos != string::npos) ? filePath.substr(pos + 1) : filePath;
-}
-
-string getMimeType(const string& filename) {
-    string extension = filename.substr(filename.find_last_of(".") + 1);
-    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
-
-    // Add more cases as needed
-    if (extension == "jpg" || extension == "jpeg") {
-        return "image/jpeg";
-    } else if (extension == "png") {
-        return "image/png";
-    } else {
-        return "application/octet-stream"; // Default binary type
-    }
-
-}
-
 class UploadClient {
 public:
+
+    // Function to extract the filename from a file path (assuming a Windows path)
+    static string extractFileName(const string& filePath) {
+        size_t pos = filePath.find_last_of("\\/");
+        return (pos != string::npos) ? filePath.substr(pos + 1) : filePath;
+    }
+
+    static string getMimeType(const string& filename) {
+        string extension = filename.substr(filename.find_last_of(".") + 1);
+        std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+
+        // Add more cases as needed
+        if (extension == "jpg" || extension == "jpeg") {
+            return "image/jpeg";
+        } else if (extension == "png") {
+            return "image/png";
+        } else {
+            return "application/octet-stream"; // Default binary type
+        }
+
+    }
+
     static void postFile(const string &serverAddress, int port, const string &caption, const string &date, const string &filePath) {
         string filename = extractFileName(filePath);
 
@@ -142,18 +143,18 @@ public:
         }
     }
 };
-
-int main() {
-    const string serverAddress = "localhost";
-    const int port = 8082;
-    const string filePath = "C:\\Users\\bardi\\OneDrive\\Pictures\\Lebron.jpg";
-
-    try {
-        UploadClient::postFile(serverAddress, port, "Orange Truck", "2023-10-30", filePath);
-        cout << "File uploaded successfully!" << endl;
-    } catch (const FileUploadException& e) {
-        cerr << "Error. Exception: " << e.what() << endl;
-    }
-
-    return 0;
-}
+//
+//int main() {
+//    const string serverAddress = "localhost";
+//    const int port = 8081;
+//    const string filePath = "/Users/ravdeepaulakh/Documents/test/a.jpg";
+//
+//    try {
+//        UploadClient::postFile(serverAddress, port, "Orange Truck", "2023-10-30", filePath);
+//        cout << "File uploaded successfully!" << endl;
+//    } catch (const FileUploadException& e) {
+//        cerr << "Error. Exception: " << e.what() << endl;
+//    }
+//
+//    return 0;
+//}

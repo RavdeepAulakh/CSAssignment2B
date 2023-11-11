@@ -11,15 +11,27 @@ using namespace std;
 
 class AsyncTask {
 
-protected:
+public:
 
-    virtual string doInBackground();
+    virtual std::string doInBackground() {
+        // Placeholder implementation for doInBackground
+        return "Default doInBackground result";
+    }
 
-    virtual void onPreExecute();
+    virtual void onPreExecute() {
+        // Placeholder implementation for onPreExecute
+        std::cout << "Default onPreExecute called" << std::endl;
+    }
 
-    virtual void onPostExecute(const std::string& result);
+    virtual void onPostExecute(const std::string& result) {
+        // Placeholder implementation for onPostExecute
+        std::cout << "Default onPostExecute called with result: " << result << std::endl;
+    }
 
-    virtual void onProgressUpdate(const std::string& progress);
+    virtual void onProgressUpdate(const std::string& progress) {
+        // Placeholder implementation for onProgressUpdate
+        std::cout << "Default onProgressUpdate called with progress: " << progress << std::endl;
+    }
 
     inline void publishProgress(const std::string& progress) {
         onProgressUpdate(progress);

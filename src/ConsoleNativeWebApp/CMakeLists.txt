@@ -10,4 +10,12 @@ add_executable(CSAssignment2BConsole
         UploadClient.cpp
         Socket.cpp
         Socket.hpp
-        FileUploadException.hpp)
+        FileUploadException.hpp
+        UploadAsyncTask.cpp
+        UploadAsyncTask.hpp
+        Activity.cpp
+        Activity.hpp
+        WorkerThread.hpp
+        AsyncTask.cpp
+        AsyncTask.hpp
+)

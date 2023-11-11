@@ -1,5 +1,6 @@
 #include "Activity.hpp"
 #include "AsyncTask.hpp"
+#include "UploadAsyncTask.hpp"
 #include <iostream>
 
 using namespace std;
