@@ -26,7 +26,7 @@ std::string UploadAsyncTask::doInBackground() {
 
     const string serverAddress = "localhost";
     const int port = 8081;
-    const string filePath = "/Users/ravdeepaulakh/Documents/test/a.jpg";
+    const string filePath = "C:/Users/bardi/OneDrive/Pictures/Lebron.jpg";
 
     try {
         uploadClient.postFile(serverAddress, port, "Orange Truck", "2023-10-30", filePath);

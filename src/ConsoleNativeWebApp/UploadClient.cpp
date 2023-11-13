@@ -71,7 +71,7 @@ public:
         nonBinaryStream << "Content-Disposition: form-data; name=\"date\"\r\n\r\n";
         nonBinaryStream << date << "\r\n";
         nonBinaryStream << "--" << boundary << "\r\n";
-        nonBinaryStream << "Content-Disposition: form-data; name=\"file\"; filename=\"" << filename << "\"\r\n";
+        nonBinaryStream << "Content-Disposition: form-data; name=\"File\"; filename=\"" << filename << "\"\r\n";
         nonBinaryStream << "Content-Type: " << mimeType << "\r\n\r\n"; // Dynamic MIME type
 
 
@@ -87,7 +87,7 @@ public:
         size_t contentLength = nonBinaryRequestSize + binaryDataSize + closingBoundarySize;
 
         // Construct the HTTP headers
-        headerStream << "POST /upload HTTP/1.1\r\n";
+        headerStream << "POST /upload/upload HTTP/1.1\r\n";
         headerStream << "Host: " << serverAddress << ":" << port << "\r\n"; // Include the port number
         headerStream << "Content-Type: multipart/form-data; boundary=" << boundary << "\r\n";
         headerStream << "Content-Length: " << contentLength << "\r\n"; // Correct content length
