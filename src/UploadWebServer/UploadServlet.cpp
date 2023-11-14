@@ -1,19 +1,21 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <regex>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
+#include "UploadServlet.hpp"
 
-const int PORT = 8081;
-const std::string DIRECTORY_PATH = "./images/";
+UploadServlet::UploadServlet() : PORT(8081), DIRECTORY_PATH("./images/") {}
 
-void handlePOST(int clientSocket) {
+UploadServlet::~UploadServlet() = default;
+
+void UploadServlet::doGet(HttpServletRequest& request, HttpServletResponse& response) {
+    handleGET(request, response);
+}
+
+void UploadServlet::doPost(HttpServletRequest& request, HttpServletResponse& response) {
+    handlePOST(request, response);
+}
+
+void UploadServlet::handlePOST(int clientSocket) {
     std::string delimiter = "\r\n\r\n";
     char buffer[4096];
-    std::string requestData = "";
+    std::string requestData;
 
     // Receive POST data from the client
     int bytesRead;
@@ -62,21 +64,27 @@ void handlePOST(int clientSocket) {
     send(clientSocket, response.c_str(), response.length(), 0);
 }
 
-void handleGET(int clientSocket) {
+void UploadServlet::handleGET(int clientSocket) {
     // Prepare and send the HTML form for file upload
     std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-    response += "<html><head><title>File Upload Form</title></head><body>";
+    response += "<html>";
+    response += "<head><title>File Upload Form</title></head><body>";
     response += "<h1>File Upload Form</h1>";
     response += "<form action='/upload' method='post' enctype='multipart/form-data'>";
     response += "<label for='file'>Select a file:</label>";
     response += "<input type='file' name='file' id='file'><br>";
+    response += "<label for='caption'>Caption:</label>";
+    response += "<input type='text' name='caption' id='caption'><br>";
+    response += "<label for='date'>Date:</label>";
+    response += "<input type='date' name='date' id='date'><br>";
     response += "<input type='submit' value='Upload'>";
-    response += "</form></body></html>";
+    response += "</form></body>";
+    response += "</html>";
 
     send(clientSocket, response.c_str(), response.length(), 0);
 }
 
-int main() {
+void UploadServlet::startServer() {
     int serverSocket, clientSocket;
     struct sockaddr_in serverAddr, clientAddr;
     socklen_t sinSize = sizeof(struct sockaddr_in);
@@ -135,5 +143,11 @@ int main() {
     }
 
     close(serverSocket);
+}
+
+
+int main() {
+    UploadServlet servlet;
+    servlet.startServer();
     return 0;
 }
