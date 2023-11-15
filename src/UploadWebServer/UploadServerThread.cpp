@@ -13,6 +13,10 @@ class UploadServerThread {
 private:
     int clientSocketFd;
 
+    Socket * clientSocket;
+
+    pthread_t uploadThread;
+
     // Static wrapper function to call HandleClient
     static void *ThreadFunc(void *arg) {
         UploadServerThread *uploadServerThread = static_cast<UploadServerThread*>(arg);
@@ -75,7 +79,7 @@ private:
 
 public:
     // Constructor
-    UploadServerThread(int clientSocketFd) : clientSocketFd(clientSocketFd) {}
+    UploadServerThread(int clientSocketFd, Socket * socket) : clientSocketFd(clientSocketFd), clientSocket(socket) {}
 
     // Function to start the thread
     void Start() {
