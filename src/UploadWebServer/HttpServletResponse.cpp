@@ -38,3 +38,32 @@ void HttpServletResponse::sendResponse() {
         write(sockfd, &body[0], body.size());
     }
 }
+
+
+/*
+void HttpServletResponse::sendResponse() {
+    std::ostringstream responseStream;
+
+    // Construct the response
+    responseStream << status;
+    for (const auto &header : headers) {
+        responseStream << header.first << ": " << header.second << "\r\n";
+    }
+    // Add Content-Length if there's a body
+    if (!body.empty()) {
+        responseStream << "Content-Length: " << body.size() << "\r\n";
+    }
+    responseStream << "\r\n"; // End of headers
+    if (!body.empty()) {
+        responseStream.write(&body[0], body.size());
+    }
+
+    // Convert the stream to a string and send it
+    std::string response = responseStream.str();
+    ssize_t bytesWritten = write(sockfd, response.c_str(), response.size());
+    if (bytesWritten < 0) {
+        // Handle error, e.g., logging or throwing an exception
+    }
+}
+
+*/

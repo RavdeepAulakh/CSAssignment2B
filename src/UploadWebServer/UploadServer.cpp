@@ -5,9 +5,8 @@
 // use server socket class to create instance of server socket
 // in the main program in Upload Server
 
-#pragma once
 #include "ServerSocket.hpp"
-#include "UploadServerThread.hpp"
+#include "UploadServerThread.h"
 #include <stddef.h>
 
 #include <iostream>
@@ -35,10 +34,10 @@ int main() {
 
         // Create a ClientSocket pointer
           // This is used to make a new connection 
-        Socket *clientSocket = serverSocket->Accept();
+        int clientSocketFD = serverSocket->Accept();
 
         // Create a new UploadServerThread to handle the new connection
-        uploadServerThread = new UploadServerThread(clientSocket);
+        uploadServerThread = new UploadServerThread(clientSocketFD);
 
         // Start the UploadServerThread - handles client interaction
         uploadServerThread->Start();
