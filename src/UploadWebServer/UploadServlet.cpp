@@ -1,4 +1,3 @@
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <regex>
@@ -11,6 +10,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <algorithm>
+#include <iostream>
 
 
 const std::string DIRECTORY_PATH = "/Users/laurieannesolkoski/CLionProjects/CSAssignment2B/images";
@@ -114,7 +114,6 @@ std::vector<std::string> receiveAndParseHttpRequest(int clientSocket) {
 
 // Function to handle the GET request
 void handleGET(int clientSocket) {
-    std::string filesListHTML = listFilesAsHTML(DIRECTORY_PATH);
     std::ostringstream html;
     html << "HTTP/1.1 200 OK\r\n"
          << "Content-Type: text/html\r\n"
@@ -130,7 +129,6 @@ void handleGET(int clientSocket) {
          << "<input type='date' name='date' id='date'><br>"
          << "<input type='submit' value='Upload'>"
          << "</form>"
-         << filesListHTML
          << "</body></html>";
 
     writeStringToSocket(clientSocket, html.str());
@@ -143,7 +141,7 @@ std::string extractBoundary(const std::string &contentType) {
     size_t boundaryPos = contentType.find(boundaryPrefix);
     if (boundaryPos != std::string::npos) {
         boundaryPos += boundaryPrefix.length();
-        return "--" + contentType.substr(boundaryPos); // Ensure only the boundary is extracted
+        return "--" + contentType.substr(boundaryPos); // only the boundary is extracted
     }
     return "";
 }
@@ -196,7 +194,7 @@ void parseHeaders(const std::vector<std::string>& requestData, std::string& boun
                 if (endPos != std::string::npos) {
                     fieldName = line.substr(namePos, endPos - namePos);
                 }
-                // Optionally, handle the case where endPos is std::string::npos
+
             }
 
             if (filenamePos != std::string::npos) {
@@ -205,7 +203,7 @@ void parseHeaders(const std::vector<std::string>& requestData, std::string& boun
                 if (endPos != std::string::npos) {
                     fileName = line.substr(filenamePos, endPos - filenamePos);
                 }
-                // Optionally, handle the case where endPos is std::string::npos
+
             }
         }
     }
@@ -214,41 +212,53 @@ void parseHeaders(const std::vector<std::string>& requestData, std::string& boun
 
 
 //read the binary data
-std::vector<char> readBinaryData(int clientSocket, const std::string& boundary) {
+std::vector<char> readBinaryData(int clientSocket, const std::string& boundary, size_t contentLength) {
+    debugLog("Reading binary data");
     std::vector<char> fileContent;
-    std::string readBuffer;
-    char buf;
-    bool boundaryReached = false;
+    fileContent.reserve(contentLength);
 
-    while (true) {
+    std::string buffer;
+    buffer.reserve(1024); // Reserve space for the buffer
+
+    char buf;
+    bool startRecording = false;
+    size_t bytesRead = 0;
+
+    while (bytesRead < contentLength) {
         ssize_t rval = read(clientSocket, &buf, 1);
         if (rval <= 0) {
-            // Handle errors or closed connection
+            debugLog("Failed to read data or connection closed");
             break;
         }
 
-        readBuffer.push_back(buf);
+        buffer.push_back(buf);
+        bytesRead++;
 
-        // Check if the read buffer ends with the boundary
-        if (readBuffer.size() >= boundary.size() &&
-            readBuffer.compare(readBuffer.size() - boundary.size(), boundary.size(), boundary) == 0) {
-            boundaryReached = true;
-            break;
+        if (!startRecording) {
+            // Look for the end of the headers and start of file content
+            size_t pos = buffer.find("--\r\n");
+            if (pos != std::string::npos) {
+                startRecording = true;
+                buffer.clear(); // Clear buffer to start recording file content
+            }
+        } else {
+            // Recording file content
+            if (buffer.size() >= boundary.size() && buffer.compare(0, boundary.size(), boundary) == 0) {
+                debugLog("Boundary reached, ending file content read");
+                break;
+            }
+
+            fileContent.push_back(buf);
+
+            if (buffer.size() >= boundary.size()) {
+                buffer.erase(0, 1); // Keep buffer size manageable
+            }
         }
-
-        // Append to file content
-        fileContent.push_back(buf);
     }
 
-    // Remove the boundary from the end of file content
-    if (boundaryReached && fileContent.size() >= boundary.size()) {
-        fileContent.resize(fileContent.size() - boundary.size());
-    }
-
+    debugLog("File content read complete");
     return fileContent;
 }
-
-
 
 
 
@@ -267,70 +277,78 @@ void saveFile(const std::string& directoryPath, const std::string& newFileName, 
 }
 
 //handle the post request
-void handlePostRequest(int clientSocket, std::vector<std::string> requestData) {
-    debugLog("Entered handlePostRequest");
+void handlePostRequest(int clientSocket, const std::vector<std::string>& requestData) {
+    debugLog("Handling POST request");
 
-
-    std::string boundary, fieldName, fileName, caption, date;
-    std::string fieldValue;
+    std::string boundary, fileName;
+    bool isFileContent = false;
+    bool skipLine = false; // Flag to skip the Content-Type line
     std::vector<char> fileContent;
-    bool isReadingFile = false;
-    bool pastHeaders = false;
 
-// Extract boundary from the headers
-    for (const auto &line : requestData) {
+    for (const auto& line : requestData) {
+        // Extract boundary
         if (startsWith(line, "Content-Type: multipart/form-data")) {
             boundary = extractBoundary(line);
         }
-    }
 
-    // Process each line of request data
-    for (const auto &line : requestData) {
-        if (startsWith(line, boundary)) {
-            pastHeaders = false; // Reset for the next part of the form-data
+        // Find filename
+        if (startsWith(line, "Content-Disposition: form-data;") && line.find("filename=\"") != std::string::npos) {
+            size_t startPos = line.find("filename=\"") + 10;
+            size_t endPos = line.find("\"", startPos);
+            fileName = line.substr(startPos, endPos - startPos);
+            isFileContent = true; // The next non-empty line after this is file content
+            skipLine = true; // Skip the next line (Content-Type)
+            continue;
+        }
 
-            if (!fieldName.empty() && isReadingFile && !fileContent.empty()) {
-                // End of file content reached
-                break;
-            } else if (!fieldValue.empty()) {
-                if (fieldName == "caption") caption = fieldValue;
-                else if (fieldName == "date") date = fieldValue;
-                fieldValue.clear(); // Clear the fieldValue for the next field
+        if (isFileContent) {
+            if (line == boundary || line == (boundary + "--")) {
+                break; // End of file content
             }
-
-            isReadingFile = false;
-        } else if (startsWith(line, "Content-Disposition:")) {
-            parseHeaders({line}, boundary, fieldName, fileName);
-            isReadingFile = (fieldName == "file");
-        } else if (isReadingFile) {
-            if (line == "\r\n" && !pastHeaders) {
-                pastHeaders = true; // Start reading the actual content after headers
+            if (skipLine) {
+                skipLine = false; // Skip this line and reset the flag
                 continue;
             }
-            if (pastHeaders) {
+            if (!line.empty()) {
                 fileContent.insert(fileContent.end(), line.begin(), line.end());
+                if (line.back() != '\r') {
+                    fileContent.push_back('\n');
+                }
             }
-        } else if (!line.empty() && !isReadingFile) {
-            fieldValue += line; // Accumulate field value
         }
     }
 
+    debugLog("File content size: " + std::to_string(fileContent.size()));
 
-    // Generate filename and save file
-    if (!fileName.empty()) {
-        std::string newFileName = generateNewFilename(caption, date, fileName);
-        debugLog("Generated FileName: " + newFileName);
-        saveFile(DIRECTORY_PATH, "/" + newFileName, fileContent);
+    // Save the file
+    if (!fileContent.empty() && !fileName.empty()) {
+        std::string fullPath = DIRECTORY_PATH + "/" + fileName;
+        std::ofstream outFile(fullPath, std::ios::binary);
+        if (outFile.is_open()) {
+            outFile.write(fileContent.data(), fileContent.size());
+            outFile.close();
+            debugLog("File saved: " + fullPath);
+        } else {
+            debugLog("Failed to open file for writing: " + fullPath);
+        }
+    } else {
+        debugLog("No file content found or file name is empty.");
     }
 
-    writeStringToSocket(clientSocket, "HTTP/1.1 200 OK\r\n\r\n");
-    debugLog("POST handling complete");
+
+    std::string filesListHTML = listFilesAsHTML(DIRECTORY_PATH);
+    std::ostringstream html;
+    html << "HTTP/1.1 200 OK\r\n"
+         << "Content-Type: text/html\r\n"
+         << "\r\n"
+         << "<html><head><title>File Upload Result</title></head><body>"
+         << filesListHTML
+         << "</body></html>";
+
+    // Send response to client
+    writeStringToSocket(clientSocket,  html.str());
+    debugLog("POST request handling complete");
 }
-
-
-
-
-
 
 
 // Main server function
@@ -402,7 +420,7 @@ int main() {
     if (stat(DIRECTORY_PATH.c_str(), &st) == -1) {
         if (mkdir(DIRECTORY_PATH.c_str(), 0700) == -1) {
             debugLog("Failed to create directory: " + DIRECTORY_PATH);
-            return 1; // or handle the error appropriately
+            return 1;
         }
     }
 
@@ -410,4 +428,6 @@ int main() {
     debugLog("Server shutdown");
     return 0;
 }
+
+
 
