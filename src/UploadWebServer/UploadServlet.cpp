@@ -142,7 +142,7 @@ std::string extractBoundary(const std::string &contentType) {
     size_t boundaryPos = contentType.find(boundaryPrefix);
     if (boundaryPos != std::string::npos) {
         boundaryPos += boundaryPrefix.length();
-        return "--" + contentType.substr(boundaryPos); // Ensure only the boundary is extracted
+        return "--" + contentType.substr(boundaryPos); // makes sure only the boundary is extracted
     }
     return "";
 }
@@ -174,7 +174,7 @@ std::string generateNewFilename(const std::string& caption, const std::string& d
     } else if (!sanitizedCaption.empty()) {
         return sanitizedCaption + extension;
     } else {
-        return "defaultFilename" + extension; // Replace with a default filename if both caption and date are empty
+        return "defaultFilename" + extension;
     }
 }
 
@@ -195,7 +195,7 @@ void parseHeaders(const std::vector<std::string>& requestData, std::string& boun
                 if (endPos != std::string::npos) {
                     fieldName = line.substr(namePos, endPos - namePos);
                 }
-                // Optionally, handle the case where endPos is std::string::npos
+
             }
 
             if (filenamePos != std::string::npos) {
@@ -204,7 +204,7 @@ void parseHeaders(const std::vector<std::string>& requestData, std::string& boun
                 if (endPos != std::string::npos) {
                     fileName = line.substr(filenamePos, endPos - filenamePos);
                 }
-                // Optionally, handle the case where endPos is std::string::npos
+
             }
         }
     }
@@ -357,10 +357,10 @@ void startServer() {
     // set the options
     int _enable = 1;
     if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &_enable, sizeof(_enable)) < 0) {
-        /*Do stuff */
+
     }
     if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEPORT, &_enable, sizeof(_enable)) < 0) {
-        /* Do stuff */
+
     }
 
     if (bind(serverSocket, reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr)) == -1) {
@@ -405,7 +405,7 @@ void startServer() {
 
 int main() {
     debugLog("Starting server");
-    // Ensure the images directory exists
+
     struct stat st = {0};
     if (stat(DIRECTORY_PATH.c_str(), &st) == -1) {
         if (mkdir(DIRECTORY_PATH.c_str(), 0700) == -1) {
